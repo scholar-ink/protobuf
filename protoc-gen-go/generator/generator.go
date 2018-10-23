@@ -62,6 +62,7 @@ import (
 
 	"github.com/golang/protobuf/protoc-gen-go/descriptor"
 	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
+	"github.com/serenize/snaker"
 )
 
 // generatedCodeVersion indicates a version of the generated code.
@@ -1578,7 +1579,7 @@ func (g *Generator) goTag(message *Descriptor, field *descriptor.FieldDescriptor
 		// perhaps this should be in its own "json" tag.
 		name += ",json=" + json
 	}
-	name = ",name=" + name
+	name = ",name=" + snaker.CamelToSnake(name)
 	if message.proto3() {
 		name += ",proto3"
 	}
@@ -2515,8 +2516,8 @@ func (g *Generator) generateMessage(message *Descriptor) {
 		ns := allocNames(base, "Get"+base)
 		fieldName, fieldGetterName := ns[0], ns[1]
 		typename, wiretype := g.GoType(message, field)
-		jsonName := *field.Name
-		tag := fmt.Sprintf("protobuf:%s json:%q", g.goTag(message, field, wiretype), jsonName+",omitempty")
+		jsonName := snaker.CamelToSnake(*field.Name)
+		tag := fmt.Sprintf("protobuf:%s json:%q", g.goTag(message, field, wiretype), jsonName)
 
 		oneof := field.OneofIndex != nil
 		if oneof && oFields[*field.OneofIndex] == nil {
